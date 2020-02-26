@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>贪吃蛇</title>
+		<style>
+			#myCanvas{
+				border: 1px blue solid;
+			}
+			#div1{
+				width: 200px;
+				height: 100px;
+				position: absolute;
+				left: 200px;
+				top:200px;
+				z-index: 20;
+				font-size: 60px;
+				display:none;
+				}
+		</style>
+	</head>
+	<body>
+		<canvas id="myCanvas" width="500" height="500" ></canvas>
+		<div id = "div1">
+			你死了
+		</div>
+		<script>
+			var log = console.log.bind(console);
+
+			var myCanvas = document.getElementById("myCanvas");
+			var ctx = myCanvas.getContext("2d");
+
+			var Food = function() {
+
+				var food = {
+					x: Math.floor(Math.random() * 480),
+					y: Math.floor(Math.random() * 480),
+					width: 20,
+					height: 20,
+					color: "blue"
+				}
+				food.draw = function() {
+					ctx.fillStyle = this.color;
+					ctx.fillRect(this.x, this.y, this.width, this.height);
+				}
+				food.redraw = function(){
+					this.x = Math.floor(Math.random() * 480);
+					this.y = Math.floor(Math.random() * 480);
+				}
+				return food;
+			}
+			var SnakeHead = function() {
+				var body = [{
+					x: 220,
+					y: 200
+				}, {
+					x: 240,
+					y: 200
+				}, {
+					x: 260,
+					y: 200
+				}]
+				
+				var snakeHead = {
+					x: 200,
+					y: 200,
+					width: 20,
+					height: 20,
+					color: "yellow",
+					speed: 3,
+					body: body
+				}
+				
+				snakeHead.move = function() {
+					for (var i = this.body.length - 1; i > 0; i--) {
+						this.body[i].x = this.body[i - 1].x;
+						this.body[i].y = this.body[i - 1].y;
+					}
+					 this.body[0].x =this.x;
+					 this.body[0].y =this.y;
+				}
+
+				snakeHead.draw = function() {
+					ctx.fillStyle = this.color;
+					ctx.fillRect(this.x, this.y, this.width, this.height);
+					for (i = 0; i < this.body.length; i++) {
+						ctx.fillRect(this.body[i].x, this.body[i].y, this.width, this.height);
+					}
+
+				}
+				snakeHead.eat = function(food){
+					if(this.x > food.x-10&&this.x<food.x +20){
+						if(this.y>food.y-10 &&this.y<food.y +20){
+							return true;
+						}
+					}
+					return false;
+				}
+				snakeHead.destroy = function(){
+					this.x = 1000000;
+					this.y = 100000;
+				}
+				snakeHead.movetop = function() {
+					this.y -= this.speed;
+				}
+				snakeHead.moveleft = function() {
+					this.x -= this.speed;
+				}
+				snakeHead.movebottom = function() {
+					this.y += this.speed;
+				}
+				snakeHead.moveright = function() {
+					this.x += this.speed;
+				}
+
+				snakeHead.dead = function(){
+					if(this.x == 0||this.x > 500||this.y ==0||this.y >500){
+						return true;
+					}
+					return false;
+				}
+				snakeHead.remove
+				return snakeHead;
+			}
+
+			//游戏运行
+
+
+			var Game = function() {
+				var game = {
+					actions: {}, //键a 值是绑定的函数	
+				}
+				game.registerAction = function(key, callback) {
+					game.actions[key] = callback;
+				}
+				game.currentmove = function() {
+
+				};
+				window.addEventListener("keydown", function(event) {
+					// game.keydowns[event.key]();
+					// currmove = actions[event.key];
+					game.currentmove = function() {
+						log("aa")
+						game.actions[event.key]()
+					}
+				})
+				setInterval(function() {
+					//状态+ 运动+刷新			
+					game.currentmove();
+					ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+					game.draw();
+				}, 1000 / 60)
+				return game;
+			}
+			var food = new Food();
+			var snakehead = new SnakeHead();
+			var sb = new Array();
+
+
+
+			var game = new Game();
+			game.registerAction("a", function() {
+				snakehead.moveleft();
+			})
+			game.registerAction("d", function() {
+				snakehead.moveright();
+			})
+			game.registerAction("w", function() {
+				snakehead.movetop();
+			})
+			game.registerAction("s", function() {
+				snakehead.movebottom()
+			})
+
+			game.draw = function() {
+				food.draw();				
+				snakehead.move();
+				if(snakehead.eat(food)){
+					snakehead.body.unshift({x:snakehead.x,y:snakehead.y});
+					snakehead.body.unshift({x:snakehead.x,y:snakehead.y});
+					snakehead.body.unshift({x:snakehead.x,y:snakehead.y});
+					snakehead.body.unshift({x:snakehead.x,y:snakehead.y});
+					food.redraw();	
+					log("吃吃吃")
+				}
+				snakehead.draw();	
+				if(snakehead.dead()){
+					snakehead.destroy();
+					document.getElementById("div1").style.display = "block";
+				}
+			}
+
+
+
+			// food.draw();
+			// snakehead.draw();
+			// log(food.x +" "+food.y)
+		</script>
+	</body>
+</html>
